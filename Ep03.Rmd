@@ -24,6 +24,9 @@ library(conflicted)
 conflicts_prefer(dplyr::select)
 conflicts_prefer(dplyr::filter)
 conflicts_prefer(dplyr::mutate)
+
+
+
 ```
 
 ```{r}
@@ -58,14 +61,39 @@ pSup <- pnorm(r2, mean = mediaLlenado, sd = errorEstandar, lower.tail = FALSE)
 # Acá ya tenemos la probabilidad total de ser rechazada la ho
 pGeneral <- pInf + pSup
 
-# Caclulamos la densidad de probabilidad para obtener el Y de la grafica
-y <- dnorm()
+#Creamos una secuencia de datos para poder hacer el grafico, por lo que sale en el capitulo 3-4, sabemos que cerca del 99.7% de las observaciones se encuentran a una distancia de tres desviaciones estandar de la media, por lo que para asegurar ocuparemos 4
+x <- seq(mediaLlenado - 4* errorEstandar, mediaLlenado +4*errorEstandar, length.out = 1000)
 
+# Caclulamos la densidad de probabilidad para obtener el Y de la grafica
+y <- dnorm(x, mean = mediaLlenado, sd = errorEstandar)
+
+# Creamos el dataframe para graficarlo
+data <- data.frame(x =x, y = y)
+
+# Filtramos los datos para sombrear
+zonaR1 <- subset(data, x <= r1)
+zonaR2 <- subset(data, x >= r2)
+
+g <- ggplot(data, aes(x = x, y = y)) +
+  geom_line(color = "black", size = 0.7) +
+  geom_area(data = zonaR1, fill = "red", alpha = 0.5) +
+  geom_area(data = zonaR2, fill = "red", alpha = 0.5) +
+  geom_vline(xintercept = c(r1, r2), linetype = "dashed", color = "grey") + 
+  labs(title = "Distribución Muestral de Volumen Promedio bajo H0",
+       subtitle = paste("Probabilidad de Error Tipo I (\u03b1) =", round(pGeneral, 4)),
+       x = "Media Muestral del Volumen (Litros)",
+       y = "Densidad de Probabilidad") +
+  theme_minimal() +
+  annotate("text", x = 9.65, y = 0.5, label = "Rechazo H0", color = "darkred", fontface = "bold") +
+  annotate("text", x = 10.35, y = 0.5, label = "Rechazo H0", color = "darkred", fontface = "bold") +
+  annotate("text", x = 10, y = 1.5, label = "Región de Retención", color = "darkgreen")
+g
+pGeneral
 
 
 
 ```
-
+Basandonos en el grafico realizado, las zonas sombreadas en las colas representan la probabilidad de rechazar la hipótesis nula (H_0). Por lo tanto, la probabilidad de que la ingeniera cometa un error del tipo 1, es de 0.0278069. Esto significa que hay aproximadamente un 2.78% de probabilidad de que concluya erróneamente que las maquinas están fallando, es decir, que la media de llenado es diferente a los 10 litros, cuando en realidad están funcionando de manera correcta.
 
 ### 2.- Si el verdadero volumen medio de los bidones fuera de 10,2 litros, ¿cuál sería la probabilidad de que la ingeniera, que obviamente no conoce este dato, cometa un error de tipo II? Para responder, agregue al gráfico anterior la verdadera distribución muestral de las medias y marquen (con otro color) la zona correspondiente a la probabilidad solicitada, para luego, basándose en este gráfico, calcular el área correspondiente. También hay ejemplos de este procedimiento en la lectura sobre poder estadístico.
 ¿Qué debemos determinar o resolver?
