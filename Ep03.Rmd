@@ -26,18 +26,60 @@ conflicts_prefer(dplyr::filter)
 conflicts_prefer(dplyr::mutate)
 ```
 
+```{r}
+#Desviacion estandar de 1 litro
+desvEstandar <- 1
+#La ingeniera de la planta se debe asegurar que los bidones se llenen en media de 10 litros
+mediaLlenado <- 10
+# Muestra aleatoria  de 100 envaces (50 envaces por maquina)
+n = 100
+#podemos calcular el error estandar de la media con la formula
+errorEstandar <- desvEstandar/sqrt(n)
+# Diferencia en el cumplimiento del volumen requerido entre la maquina mas antigua y la mas moderna, que esta entre el 90% y 96% de los bidones
+# Ho es que la media de llenado es = 10
+```
+
 # Equipo 1:
 
 ### 1.- Si la ingeniera piensa rechazar la hipótesis nula cuando la muestra presente una media menor a 9,78 litros o mayor a 10,22 litros, ¿cuál es la probabilidad de que cometa un error de tipo I? Para responder, generen un gráfico de la distribución muestral de las medias hipotetizada en donde se marquen las zonas correspondientes a la probabilidad solicitada, para luego, basándose en este gráfico, calcular el área correspondiente. Tome como ejemplo los scripts presentados en la lectura sobre poder estadístico.
+¿Qué debemos determinar o resolver?
+Se nos pide identificar cual es la probabilidad de rechazar la hipótesis nula cuando esta es en realidad verdadera, ademas se nos pide realizar esto mediante el análisis gráfico
+```{r}
+# Rechazos
+r1 <- 9.78
+r2 <- 10.22
+
+# Podriamos utilizar aca lo de estadistica computacional, como pnorm para que nos devuelva la probabilidad de que una variable sea menor o igual a un valor y lo separamos por las colas
+
+pInf <- pnorm(r1, mean = mediaLlenado, sd = errorEstandar)
+
+pSup <- pnorm(r2, mean = mediaLlenado, sd = errorEstandar, lower.tail = FALSE)
+
+# Acá ya tenemos la probabilidad total de ser rechazada la ho
+pGeneral <- pInf + pSup
+
+# Caclulamos la densidad de probabilidad para obtener el Y de la grafica
+y <- dnorm()
+
+
+
+
+```
 
 
 ### 2.- Si el verdadero volumen medio de los bidones fuera de 10,2 litros, ¿cuál sería la probabilidad de que la ingeniera, que obviamente no conoce este dato, cometa un error de tipo II? Para responder, agregue al gráfico anterior la verdadera distribución muestral de las medias y marquen (con otro color) la zona correspondiente a la probabilidad solicitada, para luego, basándose en este gráfico, calcular el área correspondiente. También hay ejemplos de este procedimiento en la lectura sobre poder estadístico.
-
-
+¿Qué debemos determinar o resolver?
+```{r}
+```
 ### 3.- Como no se conoce el verdadero volumen medio, genere un gráfico del poder estadístico con las condiciones anteriores, pero suponiendo que el verdadero volumen medio podría variar de 9,5 a 10,5 litros. Hay un ejemplo de este tipo de gráfico en la lectura sobre poder estadístico.
-
-
+¿Qué debemos determinar o resolver?
+```{r}
+```
 ### 4.- Considerando la suposición de que el verdadero volumen medio de los bidones es de 10,2 litros, ¿cuántos bidones deberían revisarse para conseguir un poder estadístico de 0,75 y un nivel de significación de 0,05?
-
-
+¿Qué debemos determinar o resolver?
+```{r}
+```
 ### 5.- ¿Alcanzaría esta muestra para detectar la diferencia que la ingeniera sospecha que existe entre las dos máquinas de la planta con al menos las mismas probabilidades de cometer errores?
+¿Qué debemos determinar o resolver?
+```{r}
+```
