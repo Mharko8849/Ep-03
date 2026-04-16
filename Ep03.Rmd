@@ -209,10 +209,23 @@ power.t.test(delta=delta, sd = desvEstandar, sig.level = alfa, power = poder, ty
 
 
 ```
-Respuesta:  
+Respuesta:  El análisis de poder estadístico indica que deberíamos revisar una muestra de al menos 175 bidones para poder conseguir 0.75 de poder estadístico con un nivel de significancia de 0.05
 
 ### 5.- ¿Alcanzaría esta muestra para detectar la diferencia que la ingeniera sospecha que existe entre las dos máquinas de la planta con al menos las mismas probabilidades de cometer errores?
 ¿Qué debemos determinar o resolver?
+Debemos verificar si la muestra calculada en el punto anterior, es suficiente para realizar una prueba de hipótesis para dos proporciones (90 y 96%) alcanzando las mismas probabilidades de error.
+
 ```{r}
+pAntigua <- 0.9
+pModerna <- 0.96
+
+# Calcular cuanta muestra es necesario por maquina
+nPorMaquina <- 175/2
+muestras <- power.prop.test(p1 = pAntigua, p2= pModerna, sig.level = alfa, power = poder, alternative = "two.sided")
+
+poderFinal <- power.prop.test(n= nPorMaquina ,p1 = pAntigua, p2= pModerna, sig.level = alfa, alternative = "two.sided")
+muestras
+poderFinal
+
 ```
-Respuesta:  
+Respuesta:  La muestra de 175 bidones no alcanzaría. El análisis de poder estadístico revelo que para detectar la diferencia entre un 90% y un 96% de cumplimiento con un nivel de significancia de 0.05 y un poder de 0.75, se necesitarían aproximadamente 250 bidones por máquina. Si la ingeniera utilizara la muestra de la pregunta 4 (175 bidones), el poder estadístico caería a un 34% aprox. Esto quiere decir que la probabilidad de cometer un error de tipo 2 aumentaría, fallando en mantener las mismas probabilidades de error solicitadas
