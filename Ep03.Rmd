@@ -155,47 +155,32 @@ Finalmente como podemos apreciar la probabilidad de la ingeniera de caer en un e
 
 
 ### 3.- Como no se conoce el verdadero volumen medio, genere un gráfico del poder estadístico con las condiciones anteriores, pero suponiendo que el verdadero volumen medio podría variar de 9,5 a 10,5 litros. Hay un ejemplo de este tipo de gráfico en la lectura sobre poder estadístico.
-¿Qué debemos determinar o resolver?
 ```{r}
 
-r_1 <- 9.5
-r_2 <- 10.5
+medias <- seq(9.5, 10.5, by = 0.01)
 
-#Definir los valores del enunciado
-alfa <- 0.05 
-# Definir tamaños del efecto 
-medias_verdaderas <- seq (r_1 , r_2, 0.01)
+# Calcular beta (error tipo II) para cada media
+beta <- pnorm(10.22, mean = medias, sd = errorEstandar) -
+        pnorm(9.78, mean = medias, sd = errorEstandar)
 
-deltas <- medias_verdaderas - mediaLlenado
-deltas_normalizados <- deltas / desvEstandar 
-# Definir función para calcular el poder de la prueba Z bilateral
-# y aplicar a los tamaños del efecto
-f_pzb <- function (x) pwr.norm.test (x , n = n , sig.level = alfa ,
-                                       alternative = "two.sided" ) [[ "power" ]]
-poder_bilat <- sapply ( deltas_normalizados , f_pzb ) 
+# Calcular poder estadístico
+poder <- 1 - beta
 
-# Definir función para calcular el poder de la prueba Z con hipótesis alternativa 
-# unilateral tipo "less" y aplicar a los tamaños del efecto. 
-f_pzl <- function (x) pwr.norm.test (x , n = n , sig.level = alfa ,
-                                       alternative = "less" ) [[ "power" ]]
-poder_unilat <- sapply ( deltas_normalizados , f_pzl )
+# Crear dataframe
+df_poder <- data.frame(mu = medias, poder = poder)
 
-# Graficar estas curvas
-datos_anchos <- data.frame ( deltas , poder_bilat , poder_unilat )
-datos_largos <- datos_anchos |> 
-  pivot_longer ( - deltas , names_to = "Tipo" , values_to = "Poder" )
-datos_largos [[ "Tipo" ]] <- factor ( datos_largos [[ "Tipo" ]] ,
-                                        labels = c ( "Bilateral" , "Unilateral" ) )
-g <- ggline ( datos_largos , x = "deltas" , y = "Poder" , plot_type = "l" ,
-              numeric.x.axis = TRUE , title = "Relación entre poder y tamaño del efecto" ,
-              xlab = "Delta[s]" , color = "Tipo" , palette = c ( "steelblue" , "steelblue1" ) )
-g <- ggpar (g , legend = c (.85,.35) )
-print ( g )
-
+# Graficar
+ggplot(df_poder, aes(x = mu, y = poder)) +
+  geom_line(color = "blue", size = 1) +
+  geom_vline(xintercept = 10, linetype = "dashed", color = "red") +
+  labs(title = "Poder estadístico según la media real",
+       x = "Media real (μ)",
+       y = "Poder (1 - β)") +
+  theme_minimal()
 
 ```
 
-Respuesta:  
+Respuesta:  Como se puede observar enn el gráfico, la curva de poder estadístico tiene forma de valle centrado en los 10 litros. Esto demuestra que la capacidad de la ingeniera para detectar correctamente un fallo en el llenado aumenta a medida que el verdadero volumen medio de los bidones se aleja del valor esperado. Si la maquina se descalibra solo levemente, el poder estadístico es sumamente bajo, por lo que es muy probable cometer un error de tipo2, fuera del rango de aceptación, el poder estadístico crece rápidamente, hasta aumentar cerca del 1.
 
 ### 4.- Considerando la suposición de que el verdadero volumen medio de los bidones es de 10,2 litros, ¿cuántos bidones deberían revisarse para conseguir un poder estadístico de 0,75 y un nivel de significación de 0,05?
 ¿Qué debemos determinar o resolver?
@@ -204,12 +189,14 @@ Respuesta:
 alfa <- 0.05
 poder <- 0.75
 delta <- volMedioReal - mediaLlenado
+# d de Cohen
+tamanoEfecto <- delta / desvEstandar
 
-power.t.test(delta=delta, sd = desvEstandar, sig.level = alfa, power = poder, type = "one.sample", alternative = "two.sided")
+pwr.norm.test(d = tamanoEfecto,sig.level = alfa, power = poder, alternative = "two.sided")
 
 
 ```
-Respuesta:  El análisis de poder estadístico indica que deberíamos revisar una muestra de al menos 175 bidones para poder conseguir 0.75 de poder estadístico con un nivel de significancia de 0.05
+Respuesta:  El análisis de poder estadístico indica que deberíamos revisar una muestra de al menos 174 (redondeando) bidones para poder conseguir 0.75 de poder estadístico con un nivel de significancia de 0.05
 
 ### 5.- ¿Alcanzaría esta muestra para detectar la diferencia que la ingeniera sospecha que existe entre las dos máquinas de la planta con al menos las mismas probabilidades de cometer errores?
 ¿Qué debemos determinar o resolver?
@@ -220,7 +207,7 @@ pAntigua <- 0.9
 pModerna <- 0.96
 
 # Calcular cuanta muestra es necesario por maquina
-nPorMaquina <- 175/2
+nPorMaquina <- 174/2
 muestras <- power.prop.test(p1 = pAntigua, p2= pModerna, sig.level = alfa, power = poder, alternative = "two.sided")
 
 poderFinal <- power.prop.test(n= nPorMaquina ,p1 = pAntigua, p2= pModerna, sig.level = alfa, alternative = "two.sided")
@@ -228,4 +215,4 @@ muestras
 poderFinal
 
 ```
-Respuesta:  La muestra de 175 bidones no alcanzaría. El análisis de poder estadístico revelo que para detectar la diferencia entre un 90% y un 96% de cumplimiento con un nivel de significancia de 0.05 y un poder de 0.75, se necesitarían aproximadamente 250 bidones por máquina. Si la ingeniera utilizara la muestra de la pregunta 4 (175 bidones), el poder estadístico caería a un 34% aprox. Esto quiere decir que la probabilidad de cometer un error de tipo 2 aumentaría, fallando en mantener las mismas probabilidades de error solicitadas
+Respuesta:  La muestra de 174 bidones no alcanzaría. El análisis de poder estadístico revelo que para detectar la diferencia entre un 90% y un 96% de cumplimiento con un nivel de significancia de 0.05 y un poder de 0.75, se necesitarían aproximadamente 250 bidones por máquina. Si la ingeniera utilizara la muestra de la pregunta 4 (174 bidones), el poder estadístico caería a un 34% aprox. Esto quiere decir que la probabilidad de cometer un error de tipo 2 aumentaría, fallando en mantener las mismas probabilidades de error solicitadas
