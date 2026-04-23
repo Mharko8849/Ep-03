@@ -1,0 +1,83 @@
+---
+title: "Ep-04"
+author: "Benjamín Hernandez | Marco Ortiz | Benjamín Paredes"
+date: "2026-04-15"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+paquetes <- c("boot", "caret", "ggfortify", "ggplot2", 
+  "ggpubr", "grid", "gridExtra", "gmodels", "ez", "emmeans", "infer", 
+  "kableExtra", "Hmisc", "knitr", "leaps", "lmtest", "lsmeans", 
+  "multcomp", "nlme", "plyr", "pROC", "purrr", "pwr", "readr", 
+  "scatterplot3d", "psych", "TeachingDemos", "tibble", "tidyr","nortest", "dplyr")
+
+install_if_missing <- function(p) {
+  if (!require(p, character.only = TRUE)) {
+    install.packages(p)
+    library(p, character.only = TRUE)
+  }
+}
+invisible(sapply(paquetes, install_if_missing))
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::filter)
+conflicts_prefer(dplyr::mutate)
+conflicts_prefer(dplyr::pmap())
+
+
+
+```
+
+# Contexto:
+
+### Ya conocemos bien el contraste de hipótesis sobre la media de una población o las diferencia entre las medias de dos poblaciones. Incluso tenemos herramientas para buscar un nivel de significación (α) y un poder estadístico (1 - β) específicos para estas pruebas.
+
+### Además vimos el contraste de hipótesis para determinar el valor de la proporción de elementos que cumplen una cierta característica en una población, o la diferencia de las proporciones de dos poblaciones. Aquí también vimos herramientas para buscar un nivel de significación o un nivel de poder estadístico para estas pruebas.
+
+### Ahora debemos practicar métodos que nos ayuden a contrastar hipótesis, más débiles que en las pruebas anteriores, cuando las condiciones para aplicar con validez las pruebas estudiadas hasta ahora no se cumplen del todo. Partiremos con las proporciones.
+
+
+```{r}
+# Datos globales
+```
+
+# Equipo 1:
+
+### Considere un nivel de significación α=0,05 para el análisis de las siguientes preguntas. Además, de necesitarse un análisis post-hoc, utilice la corrección de Holm.
+
+### 1.- Una agencia de marketing desea determinar si hay una diferencia significativa en la efectividad de tres estrategias publicitarias utilizadas para promocionar un nuevo producto. Para ello, se ha recopilado información de personas que fueron expuestas a las tres estrategias publicitarias, registrando si mostraron una aceptación (A) o rechazo (R) a cada una de ellas. ¿Qué puede concluir la agencia de marketing sobre la efectividad de las estrategias publicitarias para promover el nuevo producto? Indicación: obtenga la muestra de 50 personas a partir del archivo “EP04 Datos.csv” que se encuentra en el directorio compartido, usando la semilla 112.
+¿Qué debemos determinar o resolver?
+
+```{r}
+
+```
+Respuesta:  
+
+### 2.- Una organización de conservación de la fauna silvestre estudia manadas de tres tipos de animales herbívoros en reservas naturales africanas. Se seleccionó aleatoriamente una muestra de 30 observaciones de los animales que se acercaron a beber agua en el principal afluente de las reservas Etosha y Mahago durante tres días consecutivos del mes de febrero. Se registraron 4 elefantes, 21 antílopes y 5 cebras en la primera, y 14 elefantes, 7 antílopes y 9 cebras en la segunda. ¿Existe evidencia de que la proporción de especies es la misma en ambas reservas?
+¿Qué debemos determinar o resolver?
+
+
+```{r}
+
+```
+Respuesta:  
+
+### 3.- Una organización dedicada a la rehabilitación de villanos ha observado que muchos de ellos ingresan al programa con niveles elevados de hostilidad. Para abordar este problema, decidieron implementar un nuevo programa de bienvenida diseñado para reducir la hostilidad y facilitar la reintegración a la sociedad. Para evaluar la efectividad de este programa, se reclutó a un grupo de 20 villanos a quienes se les midió el nivel de hostilidad (alto o bajo) antes y después de participar en el programa de bienvenida. Los resultados se presentan a continuación:
+### 2 villanos no mostraron hostilidad ni antes ni después.
+### 15 villanos que inicialmente mostraban hostilidad dejaron de hacerlo.
+### 2 villanos mantuvieron un elevado nivel de hostilidad.
+### el otro villano desarrolló síntomas de hostilidad tras participar en el programa cuando antes no era hostil. ¿Qué se puede concluir acerca de la efectividad del nuevo programa de bienvenida para reducir la hostilidad en los villanos?
+¿Qué debemos determinar o resolver?
+```{r}
+
+```
+Respuesta:  
+
+### 4.- Durante un apocalipsis zombie, un grupo de 10 mujeres y 14 hombres sobrevivientes se encuentra buscando desesperadamente refugio y encuentran dos edificios abandonados que podrían servir: una escuela y un centro comercial. Algunas personas piensan que la escuela es más segura, mientras que otras consideran que el centro comercial es más seguro. Después de elegir sus opciones, se observa que 6 mujeres y 10 hombres eligen refugiarse en la escuela abandonada mientras que los otros optan por el centro comercial. ¿Hay relación entre el sexo de la persona y el edificio abandonado que encuentra más seguro?
+¿Qué debemos determinar o resolver?
+```{r}
+
+```
+Respuesta:  
