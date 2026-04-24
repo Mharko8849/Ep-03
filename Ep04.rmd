@@ -11,7 +11,7 @@ paquetes <- c("boot", "caret", "ggfortify", "ggplot2",
   "ggpubr", "grid", "gridExtra", "gmodels", "ez", "emmeans", "infer", 
   "kableExtra", "Hmisc", "knitr", "leaps", "lmtest", "lsmeans", 
   "multcomp", "nlme", "plyr", "pROC", "purrr", "pwr", "readr", 
-  "scatterplot3d", "psych", "TeachingDemos", "tibble", "tidyr","nortest", "dplyr")
+  "scatterplot3d", "psych", "TeachingDemos", "tibble", "tidyr","nortest", "dplyr", "RVAideMemoire", "rcompanion")
 
 install_if_missing <- function(p) {
   if (!require(p, character.only = TRUE)) {
@@ -41,6 +41,7 @@ conflicts_prefer(dplyr::pmap())
 
 ```{r}
 # Datos globales
+alfa <- 0.05
 ```
 
 # Equipo 1:
@@ -49,11 +50,38 @@ conflicts_prefer(dplyr::pmap())
 
 ### 1.- Una agencia de marketing desea determinar si hay una diferencia significativa en la efectividad de tres estrategias publicitarias utilizadas para promocionar un nuevo producto. Para ello, se ha recopilado información de personas que fueron expuestas a las tres estrategias publicitarias, registrando si mostraron una aceptación (A) o rechazo (R) a cada una de ellas. ¿Qué puede concluir la agencia de marketing sobre la efectividad de las estrategias publicitarias para promover el nuevo producto? Indicación: obtenga la muestra de 50 personas a partir del archivo “EP04 Datos.csv” que se encuentra en el directorio compartido, usando la semilla 112.
 ¿Qué debemos determinar o resolver?
-
+Debemos determinar si existe diferencia en la proporción de aceptación entre las tres estrategias evaluadas en un mismo grupo de personas. Corresponde a la prueba Q de Cochran.
 ```{r}
+# Se carga el data-set
+datos_csv <- read.csv("EP04 Datos.csv", sep = ";")
+# Se fije la semilla para mostrar los resultados aletorios 
+set.seed(112)
+datos_muestra <- datos_csv[sample(nrow(datos_csv), 50), ]
 
+
+# Convertir el formato ancho a largo para la función cochran.qtest
+datos_largos <- datos_muestra |>
+  pivot_longer(cols = c("estrategia_1", "estrategia_2", "estrategia_3"),
+               names_to = "Estrategia",
+               values_to = "Respuesta") |>
+  mutate(id = as.factor(id), Estrategia = as.factor(Estrategia),
+         # Convertimos A y R a 1 y 0 para la prueba
+         Exito = ifelse(Respuesta == "A", 1, 0))
+
+# Prueba Ómnibus: Q de Cochran
+prueba_qc <- cochran.qtest(Exito ~ Estrategia | id, data = datos_largos, alpha = alfa)
+print(prueba_qc)
+
+# Procedimiento post-hoc si hay diferencias (corrección de Holm)
+if (prueba_qc$p.value < alfa) {
+  cat("\nRealizando procedimiento post-hoc (McNemar con corrección de Holm):\n")
+  post_hoc <- rcompanion::pairwiseMcnemar(Exito ~ Estrategia | id,
+                              data = datos_largos,
+                              test = "mcnemar", correct = FALSE, method = "holm")
+  print(post_hoc)
+}
 ```
-Respuesta:  
+Respuesta: 
 
 ### 2.- Una organización de conservación de la fauna silvestre estudia manadas de tres tipos de animales herbívoros en reservas naturales africanas. Se seleccionó aleatoriamente una muestra de 30 observaciones de los animales que se acercaron a beber agua en el principal afluente de las reservas Etosha y Mahago durante tres días consecutivos del mes de febrero. Se registraron 4 elefantes, 21 antílopes y 5 cebras en la primera, y 14 elefantes, 7 antílopes y 9 cebras en la segunda. ¿Existe evidencia de que la proporción de especies es la misma en ambas reservas?
 ¿Qué debemos determinar o resolver?
