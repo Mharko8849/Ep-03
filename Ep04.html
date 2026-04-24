@@ -422,7 +422,7 @@ datos_largos &lt;- datos_muestra |&gt;
 
 # Prueba Ómnibus: Q de Cochran
 prueba_qc &lt;- cochran.qtest(Exito ~ Estrategia | id, data = datos_largos, alpha = alfa)
-print(prueba_qc)</code></pre>
+prueba_qc</code></pre>
 <pre><code>## 
 ##  Cochran&#39;s Q test
 ## 
@@ -444,17 +444,12 @@ print(prueba_qc)</code></pre>
 ## P value adjustment method: fdr</code></pre>
 <pre class="r"><code># Procedimiento post-hoc si hay diferencias (corrección de Holm)
 if (prueba_qc$p.value &lt; alfa) {
-  cat(&quot;\nRealizando procedimiento post-hoc (McNemar con corrección de Holm):\n&quot;)
+  # McNemar con corrección de Holm
   post_hoc &lt;- rcompanion::pairwiseMcnemar(Exito ~ Estrategia | id,
                               data = datos_largos,
                               test = &quot;mcnemar&quot;, correct = FALSE, method = &quot;holm&quot;)
-  print(post_hoc)
+  post_hoc
 }</code></pre>
-<pre><code>## 
-## Realizando procedimiento post-hoc (McNemar con corrección de Holm):</code></pre>
-<pre><code>## Registered S3 method overwritten by &#39;DescTools&#39;:
-##   method         from 
-##   reorder.factor gdata</code></pre>
 <pre><code>## $Test.method
 ##      Test
 ## 1 mcnemar
@@ -480,7 +475,37 @@ de febrero. Se registraron 4 elefantes, 21 antílopes y 5 cebras en la
 primera, y 14 elefantes, 7 antílopes y 9 cebras en la segunda. ¿Existe
 evidencia de que la proporción de especies es la misma en ambas
 reservas?</h3>
-<p>¿Qué debemos determinar o resolver?</p>
+<p>¿Qué debemos determinar o resolver?<br />
+Determinar si dos poblaciones (reservas Etosha y Mahago) tienen una
+distribución homogénea en los niveles de una variable (las 3 especies).
+Corresponde a Chi-cuadrado de homogeneidad.</p>
+<pre class="r"><code># Crear la matriz de frecuencias
+etosha &lt;- c(4, 21, 5)
+mahago &lt;- c(14, 7, 9)
+tabla_animales &lt;- as.table(rbind(etosha, mahago))
+dimnames(tabla_animales) &lt;- list(Reserva = c(&quot;Etosha&quot;, &quot;Mahago&quot;), 
+                                 Especie = c(&quot;Elefantes&quot;, &quot;Antílopes&quot;, &quot;Cebras&quot;))
+
+tabla_animales</code></pre>
+<pre><code>##         Especie
+## Reserva  Elefantes Antílopes Cebras
+##   Etosha         4        21      5
+##   Mahago        14         7      9</code></pre>
+<pre class="r"><code># Realizar prueba Chi-cuadrado
+prueba_chi &lt;- chisq.test(tabla_animales)
+# Frecuencias esperadas
+prueba_chi$expected</code></pre>
+<pre><code>##         Especie
+## Reserva  Elefantes Antílopes Cebras
+##   Etosha         9        14      7
+##   Mahago         9        14      7</code></pre>
+<pre class="r"><code># Prueba Chi-cuadrado con los resultados reales
+prueba_chi</code></pre>
+<pre><code>## 
+##  Pearson&#39;s Chi-squared test
+## 
+## data:  tabla_animales
+## X-squared = 13.698, df = 2, p-value = 0.00106</code></pre>
 <p>Respuesta:</p>
 </div>
 <div id="una-organización-dedicada-a-la-rehabilitación-de-villanos-ha-observado-que-muchos-de-ellos-ingresan-al-programa-con-niveles-elevados-de-hostilidad.-para-abordar-este-problema-decidieron-implementar-un-nuevo-programa-de-bienvenida-diseñado-para-reducir-la-hostilidad-y-facilitar-la-reintegración-a-la-sociedad.-para-evaluar-la-efectividad-de-este-programa-se-reclutó-a-un-grupo-de-20-villanos-a-quienes-se-les-midió-el-nivel-de-hostilidad-alto-o-bajo-antes-y-después-de-participar-en-el-programa-de-bienvenida.-los-resultados-se-presentan-a-continuación" class="section level3">

@@ -70,25 +70,40 @@ datos_largos <- datos_muestra |>
 
 # Prueba Ómnibus: Q de Cochran
 prueba_qc <- cochran.qtest(Exito ~ Estrategia | id, data = datos_largos, alpha = alfa)
-print(prueba_qc)
+prueba_qc
 
 # Procedimiento post-hoc si hay diferencias (corrección de Holm)
 if (prueba_qc$p.value < alfa) {
-  cat("\nRealizando procedimiento post-hoc (McNemar con corrección de Holm):\n")
+  # McNemar con corrección de Holm
   post_hoc <- rcompanion::pairwiseMcnemar(Exito ~ Estrategia | id,
                               data = datos_largos,
                               test = "mcnemar", correct = FALSE, method = "holm")
-  print(post_hoc)
+  post_hoc
 }
 ```
 Respuesta: 
 
 ### 2.- Una organización de conservación de la fauna silvestre estudia manadas de tres tipos de animales herbívoros en reservas naturales africanas. Se seleccionó aleatoriamente una muestra de 30 observaciones de los animales que se acercaron a beber agua en el principal afluente de las reservas Etosha y Mahago durante tres días consecutivos del mes de febrero. Se registraron 4 elefantes, 21 antílopes y 5 cebras en la primera, y 14 elefantes, 7 antílopes y 9 cebras en la segunda. ¿Existe evidencia de que la proporción de especies es la misma en ambas reservas?
-¿Qué debemos determinar o resolver?
-
+¿Qué debemos determinar o resolver?  
+Determinar si dos poblaciones (reservas Etosha y Mahago) tienen una distribución homogénea en los niveles de una variable (las 3 especies). Corresponde a Chi-cuadrado de homogeneidad.
 
 ```{r}
+# Crear la matriz de frecuencias
+etosha <- c(4, 21, 5)
+mahago <- c(14, 7, 9)
+tabla_animales <- as.table(rbind(etosha, mahago))
+dimnames(tabla_animales) <- list(Reserva = c("Etosha", "Mahago"), 
+                                 Especie = c("Elefantes", "Antílopes", "Cebras"))
 
+tabla_animales
+
+# Realizar prueba Chi-cuadrado
+prueba_chi <- chisq.test(tabla_animales)
+# Frecuencias esperadas
+prueba_chi$expected
+
+# Prueba Chi-cuadrado con los resultados reales
+prueba_chi
 ```
 Respuesta:  
 
