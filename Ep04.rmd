@@ -85,7 +85,7 @@ Respuesta:
 
 ### 2.- Una organización de conservación de la fauna silvestre estudia manadas de tres tipos de animales herbívoros en reservas naturales africanas. Se seleccionó aleatoriamente una muestra de 30 observaciones de los animales que se acercaron a beber agua en el principal afluente de las reservas Etosha y Mahago durante tres días consecutivos del mes de febrero. Se registraron 4 elefantes, 21 antílopes y 5 cebras en la primera, y 14 elefantes, 7 antílopes y 9 cebras en la segunda. ¿Existe evidencia de que la proporción de especies es la misma en ambas reservas?
 ¿Qué debemos determinar o resolver?  
-Determinar si dos poblaciones (reservas Etosha y Mahago) tienen una distribución homogénea en los niveles de una variable (las 3 especies). Corresponde a Chi-cuadrado de homogeneidad.
+Determinar si dos poblaciones (reservas Etosha y Mahago) tienen una distribución homogénea en los niveles de una variable (las 3 especies). Esto corresponde a Chi-cuadrado de homogeneidad.
 
 ```{r}
 # Crear la matriz de frecuencias
@@ -107,20 +107,65 @@ prueba_chi
 ```
 Respuesta:  
 
-### 3.- Una organización dedicada a la rehabilitación de villanos ha observado que muchos de ellos ingresan al programa con niveles elevados de hostilidad. Para abordar este problema, decidieron implementar un nuevo programa de bienvenida diseñado para reducir la hostilidad y facilitar la reintegración a la sociedad. Para evaluar la efectividad de este programa, se reclutó a un grupo de 20 villanos a quienes se les midió el nivel de hostilidad (alto o bajo) antes y después de participar en el programa de bienvenida. Los resultados se presentan a continuación:
-### 2 villanos no mostraron hostilidad ni antes ni después.
+### 3.- Una organización dedicada a la rehabilitación de villanos ha observado que muchos de ellos ingresan al programa con niveles elevados de hostilidad. Para abordar este problema, decidieron implementar un nuevo programa de bienvenida diseñado para reducir la hostilidad y facilitar la reintegración a la sociedad. Para evaluar la efectividad de este programa, se reclutó a un grupo de 20 villanos a quienes se les midió el nivel de hostilidad (alto o bajo) antes y después de participar en el programa de bienvenida. Los resultados se presentan a continuación: 
+### 2 villanos no mostraron hostilidad ni antes ni después.  
 ### 15 villanos que inicialmente mostraban hostilidad dejaron de hacerlo.
 ### 2 villanos mantuvieron un elevado nivel de hostilidad.
 ### el otro villano desarrolló síntomas de hostilidad tras participar en el programa cuando antes no era hostil. ¿Qué se puede concluir acerca de la efectividad del nuevo programa de bienvenida para reducir la hostilidad en los villanos?
 ¿Qué debemos determinar o resolver?
+Se nos pide evaluar el cambio en una variable dicotómica (hostilidad alta/baja) medida en dos momentos distintos (antes y después) sobre los mismos sujetos (muestras pareadas). Esto corresponde a la prueba de McNemar.
+
 ```{r}
+
+# Cambios en la hostilidad
+
+# Mantuvieron elevado nivel
+alta_antes_alta_despues <- 2
+
+# Dejaron de mostrar hostilidad (Mejoraron)
+alta_antes_baja_despues <- 15
+
+# Desarrolló síntomas (Empeoraron)
+baja_antes_alta_despues <- 1   
+
+# No mostraron hostilidad ni antes ni después
+baja_antes_baja_despues <- 2  
+
+# Las filas representarán el Antes y las columnas el Después
+tabla_villanos <- matrix(c(alta_antes_alta_despues, alta_antes_baja_despues, 
+                           baja_antes_alta_despues, baja_antes_baja_despues), 
+                         nrow = 2, byrow = TRUE)
+
+# Asignamos los nombres a las dimensiones para mayor claridad
+dimnames(tabla_villanos) <- list(Antes = c("Alta", "Baja"), 
+                                 Despues = c("Alta", "Baja"))
+
+tabla_villanos
+
+# Usamos la versión sin corrección de continuidad
+prueba_mcnemar <- mcnemar.test(tabla_villanos, correct = FALSE)
+
+# Mostramos el resultado de la prueba
+prueba_mcnemar
+
 
 ```
 Respuesta:  
 
 ### 4.- Durante un apocalipsis zombie, un grupo de 10 mujeres y 14 hombres sobrevivientes se encuentra buscando desesperadamente refugio y encuentran dos edificios abandonados que podrían servir: una escuela y un centro comercial. Algunas personas piensan que la escuela es más segura, mientras que otras consideran que el centro comercial es más seguro. Después de elegir sus opciones, se observa que 6 mujeres y 10 hombres eligen refugiarse en la escuela abandonada mientras que los otros optan por el centro comercial. ¿Hay relación entre el sexo de la persona y el edificio abandonado que encuentra más seguro?
 ¿Qué debemos determinar o resolver?
+Debemos determinar si existe relación de independencia entre dos variables categóricas: Sexo de la persona y edificio preferido. Como la muestra es pequeña y algunos valores esperados podrían ser inferiores a 5 esto es incoherente con la prueba Chi-cuadrado, así que aplicaremos la prueba exacta de Fisher.
+
 ```{r}
+
+# Matriz de frecuencias (Escuela / Mall)
+mujeres <- c(6, 4)
+hombres <- c(10, 4)
+tabla_refugio <- rbind(mujeres, hombres)
+
+# Aplicamos la prueba exacta de Fisher
+prueba_fisher <- fisher.test(tabla_refugio)
+prueba_fisher
 
 ```
 Respuesta:  

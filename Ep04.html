@@ -478,7 +478,7 @@ reservas?</h3>
 <p>¿Qué debemos determinar o resolver?<br />
 Determinar si dos poblaciones (reservas Etosha y Mahago) tienen una
 distribución homogénea en los niveles de una variable (las 3 especies).
-Corresponde a Chi-cuadrado de homogeneidad.</p>
+Esto corresponde a Chi-cuadrado de homogeneidad.</p>
 <pre class="r"><code># Crear la matriz de frecuencias
 etosha &lt;- c(4, 21, 5)
 mahago &lt;- c(14, 7, 9)
@@ -534,7 +534,48 @@ hacerlo.</h3>
 el programa cuando antes no era hostil. ¿Qué se puede concluir acerca de
 la efectividad del nuevo programa de bienvenida para reducir la
 hostilidad en los villanos?</h3>
-<p>¿Qué debemos determinar o resolver?</p>
+<p>¿Qué debemos determinar o resolver? Se nos pide evaluar el cambio en
+una variable dicotómica (hostilidad alta/baja) medida en dos momentos
+distintos (antes y después) sobre los mismos sujetos (muestras
+pareadas). Esto corresponde a la prueba de McNemar.</p>
+<pre class="r"><code># Cambios en la hostilidad:
+
+# Mantuvieron elevado nivel
+alta_antes_alta_despues &lt;- 2
+
+# Dejaron de mostrar hostilidad (Mejoraron)
+alta_antes_baja_despues &lt;- 15
+
+# Desarrolló síntomas (Empeoraron)
+baja_antes_alta_despues &lt;- 1   
+
+# No mostraron hostilidad ni antes ni después
+baja_antes_baja_despues &lt;- 2  
+
+# Las filas representarán el Antes y las columnas el Después
+tabla_villanos &lt;- matrix(c(alta_antes_alta_despues, alta_antes_baja_despues, 
+                           baja_antes_alta_despues, baja_antes_baja_despues), 
+                         nrow = 2, byrow = TRUE)
+
+# Asignamos los nombres a las dimensiones para mayor claridad
+dimnames(tabla_villanos) &lt;- list(Antes = c(&quot;Alta&quot;, &quot;Baja&quot;), 
+                                 Despues = c(&quot;Alta&quot;, &quot;Baja&quot;))
+
+tabla_villanos</code></pre>
+<pre><code>##       Despues
+## Antes  Alta Baja
+##   Alta    2   15
+##   Baja    1    2</code></pre>
+<pre class="r"><code># Usamos la versión sin corrección de continuidad
+prueba_mcnemar &lt;- mcnemar.test(tabla_villanos, correct = FALSE)
+
+# Mostramos el resultado de la prueba
+prueba_mcnemar</code></pre>
+<pre><code>## 
+##  McNemar&#39;s Chi-squared test
+## 
+## data:  tabla_villanos
+## McNemar&#39;s chi-squared = 12.25, df = 1, p-value = 0.0004653</code></pre>
 <p>Respuesta:</p>
 </div>
 <div id="durante-un-apocalipsis-zombie-un-grupo-de-10-mujeres-y-14-hombres-sobrevivientes-se-encuentra-buscando-desesperadamente-refugio-y-encuentran-dos-edificios-abandonados-que-podrían-servir-una-escuela-y-un-centro-comercial.-algunas-personas-piensan-que-la-escuela-es-más-segura-mientras-que-otras-consideran-que-el-centro-comercial-es-más-seguro.-después-de-elegir-sus-opciones-se-observa-que-6-mujeres-y-10-hombres-eligen-refugiarse-en-la-escuela-abandonada-mientras-que-los-otros-optan-por-el-centro-comercial.-hay-relación-entre-el-sexo-de-la-persona-y-el-edificio-abandonado-que-encuentra-más-seguro" class="section level3">
@@ -547,7 +588,30 @@ seguro. Después de elegir sus opciones, se observa que 6 mujeres y 10
 hombres eligen refugiarse en la escuela abandonada mientras que los
 otros optan por el centro comercial. ¿Hay relación entre el sexo de la
 persona y el edificio abandonado que encuentra más seguro?</h3>
-<p>¿Qué debemos determinar o resolver?</p>
+<p>¿Qué debemos determinar o resolver? Debemos determinar si existe
+relación de independencia entre dos variables categóricas: Sexo de la
+persona y edificio preferido. Como la muestra es pequeña y algunos
+valores esperados podrían ser inferiores a 5 esto es incoherente con la
+prueba Chi-cuadrado, así que aplicaremos la prueba exacta de Fisher.</p>
+<pre class="r"><code># Matriz de frecuencias (Escuela / Mall)
+mujeres &lt;- c(6, 4)
+hombres &lt;- c(10, 4)
+tabla_refugio &lt;- rbind(mujeres, hombres)
+
+# Aplicamos la prueba exacta de Fisher
+prueba_fisher &lt;- fisher.test(tabla_refugio)
+prueba_fisher</code></pre>
+<pre><code>## 
+##  Fisher&#39;s Exact Test for Count Data
+## 
+## data:  tabla_refugio
+## p-value = 0.6734
+## alternative hypothesis: true odds ratio is not equal to 1
+## 95 percent confidence interval:
+##  0.07834344 4.67123233
+## sample estimates:
+## odds ratio 
+##   0.613213</code></pre>
 <p>Respuesta:</p>
 </div>
 </div>
