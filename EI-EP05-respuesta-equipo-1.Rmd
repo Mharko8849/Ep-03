@@ -1,0 +1,208 @@
+---
+title: "EP-05"
+author: "Equipo 1"
+date: "2026-05-03"
+output: html_document
+---
+
+```{r setup, include=FALSE, warning = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+paquetes <- c("boot", "car", "ggplot2", "ggpubr", "grid", "gridExtra",
+              "kableExtra", "knitr", "multcomp", "nlme", "plyr",
+              "RVAideMemoire", "rcompanion", "dplyr", "tidyr", "readr",
+              "nortest", "moments")
+
+install_if_missing <- function(p) {
+  if (!require(p, character.only = TRUE)) {
+    install.packages(p)
+    library(p, character.only = TRUE)
+  }
+}
+invisible(sapply(paquetes, install_if_missing))
+library(conflicted)
+conflicts_prefer(dplyr::select)
+conflicts_prefer(dplyr::filter)
+conflicts_prefer(dplyr::mutate)
+```
+
+# Actividad: ANOVA para muestras independientes
+
+### Se considero un nivel de significacion alpha = 0,05 para el analisis de las siguientes preguntas
+
+```{r}
+alfa <- 0.05
+```
+
+
+
+# Pregunta 1
+
+## Enunciado
+**¿Existen diferencias en el tiempo de resolucion de cubos 2x2x2 entre participantes de Chile, Peru y Argentina?**
+
+**Hipótesis**
+
+-Hipótesis Nula: No existen diferencias significativas en el tiempo medio de resolución del cubo 2x2x2 entre los participantes de Chile, Perú y Argentina.
+
+-Hipótesis Alternativa: Al menos una de las medias de tiempo de resolución del cubo 2x2x2 es diferente entre los participantes de Chile, Perú y Argentina.
+
+**¿Qué debemos determinar o resolver?**
+Se busca determinar si existen diferencias significativas en el tiempo medio de resolucion del cubo 2x2x2 entre los participantes de tres paises: Chile, Peru y Argentina. Dado que se comparan las medias de una variable cuantitativa en tres grupos independientes, corresponde aplicar un procedimiento ANOVA de un factor.
+
+```{r}
+datos_csv <- read.csv("EP05_Datos.csv", sep = ";")
+
+datos_csv <- datos_csv |>
+  mutate(tiempo = as.numeric(gsub(",", ".", tiempo)))
+
+datos_p1 <- datos_csv |>
+  filter(pais %in% c("Chile", "Perú", "Argentina"), tipo == "2x2x2") |>
+  mutate(pais = as.factor(pais))
+table(datos_p1$pais)
+```
+
+
+## Verificar condiciones para ANOVA
+
+### Indepencencia de las observaciones
+
+Las observaciones son independientes entre si, ya que cada participante proporciona una única medicion de resolucion del cubo 2x2.
+
+### Normalidad (Shapiro-Wilk por grupo)
+
+```{r}
+for (pais in levels(datos_p1$pais)) {
+  r <- shapiro.test(datos_p1$tiempo[datos_p1$pais == pais])
+  cat(sprintf("  %s: W = %.4f, p = %.6f\n", pais, r$statistic, r$p.value))
+}
+```
+Como P value > alfa, Los datos siguen una distribución normal
+
+### Homogeneidad de varianzas (Levene)
+
+```{r}
+leveneTest(tiempo ~ pais, data = datos_p1)
+```
+El test arroja un F(1) = 0.3417 y un p = 0.7113, por lo tanto no se rechaza la homogenidad de varianzas. Esta condicion se cumple, por lo que podemos utilizar ANOVA
+
+
+## ANOVA Omnibus
+
+```{r}
+modelo_anova <- aov(tiempo ~ pais, data = datos_p1)
+summary(modelo_anova)
+
+```
+
+**Respuesta**
+El p value presentado con la prueba es mucho mas pequeño que que nuestro alfa, por lo que existe evidencia estadistica para afirmar que el tiempo meedio de resolucion del cubo 2x2 no es igual en todos los paises, es decir, al menos uno de los pauses tiene un promedio de tiempo significativamente distinto a los demás
+
+
+## post-hoc
+Es necesario aplicar una prueba Post-Hoc para descubrir quienes son los paises que tienen una diferencia
+
+Se utilizara el test de Tukey-Kramer por no tener la misma cantidad de observaxiones. Además que Tukey tene un mayor poder estadistico para detectar diferencias reales, manteniendo el nivel de significancia. 
+
+```{r}
+
+tukey <- TukeyHSD(modelo_anova, conf.level = 0.95)
+tukey
+
+```
+Dado que el p es redondeado a 0, existe diferencia estadisticamente significativa entre todos los pares de paises. Pero Perú es el pais que puede resolver los cubos 2x2 en un menor tiempo promedio.
+
+
+# Pregunta 2
+
+## Enunciado
+**Propongan una pregunta de investigacion relacionada al impacto del lenguaje de programacion inicial (con el que se aprendio a programar) que necesite ser analizado por medio de un procedimiento ANOVA para muestras independientes con un factor que tenga entre 4 y 6 niveles. Luego inventen una poblacion para cada grupo con 5.000 datos, asegurando que cumpla las suposiciones de esta prueba.**
+
+---
+
+## Pregunta de investigacion propuesta
+
+**¿Existe una diferencia significativa en el rendimiento academico (medido como promedio de calificaciones universitarias) entre estudiantes que aprendieron a programar por primera vez con distintos lenguajes de programacion como primer lenguaje? Se consideraran seis lenguajes: Python, Java, C++, JavaScript, R y MATLAB.**
+
+### Variables involucradas
+
+- **Variable respuesta:** Rendimiento academico, cuantitativa continua, medida como promedio de calificaciones (escala 1.0 a 7.0).
+- **Variable explicativa (factor):** Lenguaje de programacion inicial, categorica con 6 niveles: Python, Java, C++, JavaScript, R y MATLAB.
+- **Unidad de analisis:** Estudiantes universitarios de la carrera de Ingenieria Civil en una universidad chilena.
+
+### Rangos de valores esperados (basados en literatura)
+
+La literatura sobre educacion en computacion indica que el lenguaje inicial puede afectar la motivacion y el rendimiento posterior. Estudios como Guzdial (2010) señalan que estudiantes que aprenden con lenguajes de alto nivel (como Python) reportan mayor confianza inicial, mientras que lenguajes de bajo nivel (como C++) generan mayores tasas de reprobacion en cursos introductorios. Se espera que los promedios de calificaciones varien entre 4.0 y 6.5 en una escala de 1.0 a 7.0.
+
+## Generacion de datos
+
+Se generaran 5.000 datos para cada uno de los 6 grupos, asegurando las condiciones de independencia, normalidad y homogenidad
+
+```{r}
+# seed recomendado por internet
+set.seed(42)
+
+n_por_grupo <- 5000
+desv_comun <- 0.3
+
+medias <- c(
+  "Python" = 5.8,
+  "Java" = 5.5,
+  "C++" = 5.0,
+  "JavaScript" = 5.6,
+  "R" = 5.4,
+  "MATLAB" = 5.2
+)
+
+# creamos el dataframe
+datos_q2 <- data.frame(
+  lenguaje = rep(names(medias), each = n_por_grupo),
+  rendimiento = unlist(lapply(medias, function(mu) rnorm(n_por_grupo, mean = mu, sd = desv_comun)))
+)
+
+# para que niuna salga del rango de notas
+datos_q2$rendimiento <- pmin(pmax(datos_q2$rendimiento, 1.0), 7.0)
+
+```
+
+
+## Verificacion de condiciones
+
+### Normalidad (Shapiro-Wilk, n = 500 por grupo)
+
+Se genera una submuestra de 500 observaciones por grupo para aplicar Shapiro-Wilk. Se reinicia el seed para reproducir los mismos datos del chunk anterior.
+
+```{r}
+for (lang in names(medias)) {
+  x <- datos_q2$rendimiento[datos_q2$lenguaje == lang][1:500]
+  r <- shapiro.test(x)
+  cat(sprintf("  %s: W = %.4f, p = %.6f\n", lang, r$statistic, r$p.value))
+}     
+```
+
+### Homogeneidad de varianzas (Levene)
+
+```{r, warning=FALSE}
+leveneTest(rendimiento ~ lenguaje, data = datos_q2)
+```
+
+## ANOVA
+Como ya se verificco anteriormente las condiciones ahora se aplica ANOVA
+
+
+```{r}
+
+anova <- aov(rendimiento ~ lenguaje, data = datos_q2)
+summary(anova)
+
+```
+Existe evidencia significativa devido a p, por lo que podemos rechazar la hipotesis Nula. El promedio de calificaciones no es igual entre todos los grupos.
+
+## Analicis Post-Hoc
+
+
+```{r}
+tukey2<- TukeyHSD(anova, conf.level = 0.95)
+tukey2
+
+```
+Si, existe una diferencia significativa en el rendimiento academico dependiendo del lenguaje con el que los estudiantes aprendieron a programar por primera vez. Segun los datos simulados y respaldados por la literatura expuesta, los estudiantes que iniciaron su aprendizaje con Python presentan el mayor rendimiento academico promedio. Por el contrario, aquellos que iniciaron con lenguajes de mas bajo nivel o mas complejos en su sintaxis inicial, como C++, presentan el rendimiento promedio significativamente mas bajo de la poblacion estudiada.
